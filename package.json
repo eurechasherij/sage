@@ -5,12 +5,10 @@
   "type": "module",
   "private": true,
   "bin": {
-    "sage": "dist/cli.js",
     "sage-mcp": "dist/mcp/stdio.js"
   },
   "exports": {
     ".": "./dist/index.js",
-    "./scanner": "./dist/scanner/index.js",
     "./data": "./dist/data/index.js"
   },
   "scripts": {
@@ -19,7 +17,8 @@
     "test": "bun test ./src",
     "dev:mcp": "bun run src/mcp/stdio.ts",
     "dev:worker": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "replay": "bun run src/replay/run.ts"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260617.1",

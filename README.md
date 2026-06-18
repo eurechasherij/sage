@@ -2,8 +2,8 @@
 
 A research-first work gate for AI coding agents. SAGE stops an agent from
 overengineering or ignoring better options by making it **research before it writes
-code**: check what is already installed, read the version-pinned docs, and only
-then (if nothing fits) search and health-check packages.
+code**: read what is already installed, reuse it, read the docs, and only then (if
+nothing fits) search and health-check packages.
 
 It exists because of two real failures it prevents:
 - an agent hand-rolled `useEffect` polling while **SWR was already installed**;
@@ -13,41 +13,29 @@ It exists because of two real failures it prevents:
 ## How it fits together
 
 ```
-HOST (your machine / the agent)          SERVICE (sage.rematcha.dev — pure data)
+THE AGENT (your machine)                 SERVICE (sage.rematcha.dev — pure data)
   /work skill ........ the gate           search_packages
-  sage scan .......... installed deps     check_package_health(_batch)
-  evaluateFloor ...... auto-install gate   get_package_docs
+  reads the manifest . any ecosystem      check_package_health(_batch)
+  reuses / decides                        get_package_docs
   decision artifact .. .sage/decisions/
 ```
 
-All model reasoning is host-side. The service is a thin, stateless aggregator over
-deps.dev / OSV / npm / Packagist. Private package names never leave the machine
-(`src/scanner/classify.ts`).
+The agent does all the reasoning: it reads the project's own manifest/lockfile to
+see what's installed (works for **any** ecosystem — npm, bun, composer, pip, go,
+cargo, gem — because reading a file needs no per-format parser), prefers reuse, and
+only calls the service to find/vet a NEW package. The service is a thin, stateless
+aggregator over OSV + the public registries. The agent only ever sends **public**
+package names to it.
 
 ## Install (one paste into Claude Code)
 
-Requires [Bun](https://bun.sh). Open Claude Code and paste:
+Open Claude Code and paste:
 
-> Install SAGE: run `git clone --single-branch --depth 1 https://github.com/eurechasherij/sage.git ~/.claude/skills/sage && cd ~/.claude/skills/sage && ./setup`, then add a "sage" section to CLAUDE.md saying to run the `/work` skill before implementing any ticket in an npm or composer project. Then ask me if I also want SAGE added to the current project for teammates.
+> Install SAGE: run `git clone --single-branch --depth 1 https://github.com/eurechasherij/sage.git ~/.claude/skills/sage && cd ~/.claude/skills/sage && ./setup`, then add a "sage" section to CLAUDE.md saying to run the `/work` skill before implementing any ticket. Then ask me if I also want SAGE added to the current project for teammates.
 
-That clones SAGE into `~/.claude/skills/sage` and registers the hosted `sage` MCP
-(`https://sage.rematcha.dev/mcp`). The `/work` skill is then available everywhere.
-Nothing to build, no `bun install`, no local server — the data service is hosted and
-the scanner the skill runs has no dependencies. (Bun is required to run the scanner.)
-
-## The host-side engine (run by the skill, not by you)
-
-`/work` reads local lockfiles by running the bundled TypeScript via Bun — no build,
-no global CLI to install:
-
-```
-bun run ~/.claude/skills/sage/src/cli.ts scan   # installed deps + public-coordinate flags
-```
-
-`scan` is the privacy boundary in code (decides what is safe to send to the MCP)
-and parses every lockfile format, so the agent never re-implements parsing or
-eyeballs "is this package private". The agent matches capabilities to the scanned
-packages itself; the same scan logic backs the CI/hook enforcement.
+That clones the `/work` skill into `~/.claude/skills/sage` and registers the hosted
+`sage` MCP (`https://sage.rematcha.dev/mcp`). Nothing to build, no local server, no
+dependencies — `/work` is a skill the agent runs, and the data service is hosted.
 
 ## Deploy the MCP service (Cloudflare Workers, push-to-deploy)
 

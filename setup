@@ -3,19 +3,11 @@ set -euo pipefail
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # SAGE setup — run after cloning into ~/.claude/skills/sage.
-# The data service is hosted (sage.rematcha.dev); the only local part is the
-# scanner, which the /work skill runs via Bun straight from source. The scanner
-# has no external deps, so there is no install and no build.
+# SAGE is a /work skill (the agent reads your manifest itself) + a hosted MCP data
+# service. There's nothing to build or install; setup just registers the MCP.
 
 HOSTED_MCP="https://sage.rematcha.dev/mcp"
 
-if ! command -v bun >/dev/null 2>&1; then
-  echo "SAGE needs Bun (the /work skill runs the scanner with it):"
-  echo "  curl -fsSL https://bun.sh/install | bash"
-  exit 1
-fi
-
-# Register the hosted MCP (search / health / docs). No local server, no deps.
 if command -v claude >/dev/null 2>&1; then
   if claude mcp add --scope user --transport http sage "$HOSTED_MCP" 2>/dev/null; then
     echo "✓ Registered the 'sage' MCP -> $HOSTED_MCP (user scope)."
@@ -30,5 +22,7 @@ fi
 
 echo
 echo "✓ SAGE installed. The /work skill is ready (start a new session if it isn't listed yet)."
-echo "  Offline/dev alternative — run the MCP locally instead of the hosted one:"
-echo "    cd \"$DIR\" && bun install && claude mcp add --scope user --transport stdio sage -- bun run \"$DIR/src/mcp/stdio.ts\""
+echo "  Bun is NOT needed for /work. It's only for the optional bits:"
+echo "    - replay calibration:  bun run \"$DIR/src/replay/run.ts\" tasks.jsonl"
+echo "    - running the MCP locally instead of the hosted one (offline/dev):"
+echo "        cd \"$DIR\" && bun install && claude mcp add --scope user --transport stdio sage -- bun run \"$DIR/src/mcp/stdio.ts\""

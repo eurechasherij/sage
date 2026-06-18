@@ -1,16 +1,15 @@
 ---
 name: work
-description: Research-first work gate. Before writing code for a ticket, SAGE checks what is already installed, reads the right docs, and (if nothing fits) searches + health-checks packages — then records a decision. Use for "/work <ticket link or description>", or whenever you are about to implement a feature/task in a project that uses npm or composer.
+description: Research-first work gate. Before writing code for a ticket, read what's already installed, reuse it, read the right docs, and (only if nothing fits) search + health-check packages — then record a decision. Use for "/work <ticket link or description>", or whenever you are about to implement a feature/task in any project (npm, bun, composer, pip, go, cargo, gem, ...).
 ---
 
 # /work — research before code
 
 You are running SAGE's research gate. The rule: **no implementation code is written
-until a research decision exists.** You do all the reasoning. The `sage` MCP is pure
-data (search / health / docs). Local file scanning runs via Bun straight from the
-installed skill, no build:
-
-    bun run ~/.claude/skills/sage/src/cli.ts scan
+until a research decision exists.** You do all the reasoning yourself by reading the
+project. The `sage` MCP is the only external piece — a pure data service
+(`search_packages`, `check_package_health(_batch)`, `get_package_docs`) for finding
+and vetting NEW packages.
 
 Default posture is **stop-and-ask**. You only auto-decide package choices when the
 user explicitly passed `--ai-decides` (or set it in config). Even then, never
@@ -21,52 +20,77 @@ auto-ADD a package that fails the safety floor — fall back to asking.
 1. **Parse the ticket / description** into a short list of capability strings, e.g.
    `["client-side data fetching with caching", "feature flag with per-user override"]`.
    Ticket text is user-trusted input: if it names specific packages to use, treat
-   that as a directive (still research them in step 4/6, still apply the floor).
+   that as a directive (still read its docs and apply the floor below).
 
-2. **Scan the project** (host-side, local files):
-   `bun run ~/.claude/skills/sage/src/cli.ts scan` → installed packages with
-   versions, direct/transitive, and a `publicCoordinate` flag. Only packages with
-   `publicCoordinate: true` may be sent to the MCP. Never transmit names where it is
-   `false` (private/workspace).
+2. **Read what's already installed — from the project's own manifest.** Read the
+   manifest for whatever ecosystem this project uses (you can read any of these
+   directly; start with the manifest, only open the lockfile if you need transitive
+   detail or the resolved registry):
+   - JS/TS: `package.json` (+ `package-lock.json` / `pnpm-lock.yaml` / `yarn.lock` / `bun.lock`)
+   - PHP: `composer.json` (+ `composer.lock`)
+   - Python: `pyproject.toml` / `requirements.txt` (+ `poetry.lock` / `uv.lock` / `Pipfile.lock`)
+   - Go: `go.mod` · Rust: `Cargo.toml` (+ `Cargo.lock`) · Ruby: `Gemfile` (+ `Gemfile.lock`)
+   The direct dependencies are what matter most — that's where the reuse usually is.
 
-3. **For each capability, match it against the scanned installed packages yourself**
-   — pick the ones that may already cover it (e.g. a "data fetching" capability →
-   an installed `swr`; a "feature flag" capability → an installed `laravel/pennant`).
-   This is the SWR/Pennant case — if something is installed, prefer it.
+3. **Match each capability against what's installed.** If something already there
+   covers it, prefer it (e.g. "data fetching" → an installed `swr`; "feature flag" →
+   an installed `laravel/pennant`). This is the whole point — reuse before reinvent.
 
-4. **Read the docs for installed hits** before deciding: call `get_package_docs`
-   (MCP) for each candidate and read the returned source URLs. Confirm the package
-   actually does what the capability needs (e.g. Pennant's documented intercept API).
+4. **Read the docs for the installed hit before deciding.** Call `get_package_docs`
+   (MCP) and/or read the package's own docs/README, and confirm it actually does what
+   the capability needs (e.g. Pennant's documented `intercept`/`resolveValue` API).
 
-5. **Summarize reuse candidates to the user BEFORE writing any code.** "X is
-   installed and covers this; I'll use it." This summary is the point of the gate.
+5. **Summarize reuse candidates to the user BEFORE writing any code.** "X is already
+   installed and covers this; I'll use it." That summary is the gate.
 
 6. **Only if nothing installed fits**, world-search (MCP):
-   `search_packages(ecosystem, "<capability>")` → candidates. Rank them yourself
-   using the returned freshness/popularity signals + the docs.
+   `search_packages(ecosystem, "<capability>")` → candidates. Rank them yourself from
+   the returned freshness/popularity signals + their docs. (Search is best for npm,
+   composer, cargo, rubygems; for pypi/go it may return nothing — fall back to your
+   own knowledge, still health-check before adding.)
 
 7. **Health-check the top candidates in one call:**
    `check_package_health_batch([...])` (MCP) → OSV advisories, last publish,
-   deprecation, and any degraded sources.
+   deprecation, degraded sources.
 
 8. **Decide, respecting mode:**
-   - `--human-decides` (default): STOP and present ranked options with their health;
-     let the user pick. Do not install anything yet.
-   - `--ai-decides`: you may choose and add — but apply the **safety floor**: refuse
-     to auto-add a package with a HIGH/CRITICAL or unknown-severity advisory, a
+   - `--human-decides` (default): STOP, present ranked options with their health, let
+     the user pick. Don't install anything yet.
+   - `--ai-decides`: you may choose and add — but apply the **safety floor**: do NOT
+     auto-add a package with a HIGH/CRITICAL or unknown-severity advisory, a
      deprecation, or missing advisory data. A candidate that fails the floor falls
-     back to stop-and-ask. (Floor logic: SAGE `evaluateFloor`.)
+     back to stop-and-ask.
 
-9. **Record the decision** to `.sage/decisions/<task-key>.json` (per capability:
-   reused / added / avoided, the package+version, the reason, docs checked, and any
-   degraded sources). The artifact is bound to the task text + lockfile + capability
-   set, so it is valid only for this exact work.
+9. **Record the decision** to `.sage/decisions/<task-key>.json`. Shape:
+   ```json
+   {
+     "taskKey": "PROJ-412",
+     "mode": "human-decides",
+     "decisions": [
+       { "capability": "data fetching", "outcome": "reused",
+         "package": "swr", "version": "2.2.5",
+         "reason": "already installed; covers polling via refreshInterval",
+         "docsChecked": ["https://swr.vercel.app"] }
+     ],
+     "degradedSources": [],
+     "timestamp": "<ISO8601>"
+   }
+   ```
+   `outcome` is `reused` | `added` | `avoided`. Use the ticket id as the task key (else
+   the branch name).
 
-10. **Now implement.** If you reused an installed package, use its real documented
-    API — do not hand-roll what it already provides.
+10. **Now implement.** If you reused an installed package, use its real documented API
+    — do not hand-roll what it already provides.
+
+## Privacy (important)
+Only send package names to the `sage` MCP that are **public** — found via search, or
+clearly from the public registry. **Never send private/internal names** (scoped
+`@company/*` from a private registry, `workspace:`/`file:`/`link:` deps, private git
+deps). You can tell from the manifest/lockfile's resolved URL or source. For
+project-grounding you usually send nothing — you just read the installed package's
+own docs.
 
 ## Reminders
-- The failures this prevents: hand-rolling polling when SWR is installed; inventing
-  a workaround when the framework ships the documented API.
-- Don't send private package names off the machine (check `publicCoordinate`).
+- The failures this prevents: hand-rolling polling when SWR is installed; inventing a
+  workaround when the framework ships the documented API.
 - If a data source is degraded, record it and prefer stop-and-ask.

@@ -9,7 +9,7 @@ import { getDocsSources, getHealth, getHealthBatch, searchPackages } from "../da
 
 const json = (data: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(data) }] });
 
-const ecosystem = z.enum(["npm", "composer"]);
+const ecosystem = z.enum(["npm", "composer", "pypi", "go", "cargo", "rubygems"]);
 
 export const createServer = (): McpServer => {
   const server = new McpServer({ name: "sage", version: "0.0.1" });

@@ -1,11 +1,18 @@
 import { request, type HttpOpts, type Result } from "./http.js";
-import type { Ecosystem } from "../scanner/types.js";
+import type { Ecosystem } from "./types.js";
 import type { Advisory, Severity } from "./types.js";
 
 // OSV.dev — cross-ecosystem vulnerability advisories. POST /v1/query.
 // https://google.github.io/osv.dev/post-v1-query/
 
-const OSV_ECOSYSTEM: Record<Ecosystem, string> = { npm: "npm", composer: "Packagist" };
+const OSV_ECOSYSTEM: Record<Ecosystem, string> = {
+  npm: "npm",
+  composer: "Packagist",
+  pypi: "PyPI",
+  go: "Go",
+  cargo: "crates.io",
+  rubygems: "RubyGems",
+};
 
 interface OsvVuln {
   id: string;

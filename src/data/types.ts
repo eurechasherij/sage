@@ -1,4 +1,7 @@
-import type { Ecosystem } from "../scanner/types.js";
+// Package ecosystems the hosted data service understands. The agent reads the
+// project's manifest itself (any ecosystem); these are the ones the service can
+// look up health/search/docs for.
+export type Ecosystem = "npm" | "composer" | "pypi" | "go" | "cargo" | "rubygems";
 
 export type Severity = "LOW" | "MODERATE" | "HIGH" | "CRITICAL" | "UNKNOWN";
 

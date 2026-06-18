@@ -11,7 +11,7 @@ agents. See `docs/design-001-research-first-work-gate.md` for the architecture.
   is relied on (e.g. a helper used above its definition).
 - TypeScript, ESM (`NodeNext`), strict mode with `noUncheckedIndexedAccess`.
 - **Bun** is the toolchain: `bun install`, `bun test ./src`, `bun run build`. Bun
-  runs `.ts` directly (e.g. `bun run src/cli.ts`), no build needed for dev.
+  runs `.ts` directly (e.g. `bun run src/replay/run.ts`), no build needed for dev.
 - Tests are `bun:test`, colocated as `*.test.ts`, run with `bun test ./src` (scoped
   to src so the compiled `dist/` copies are not double-run). Pure logic is
   unit-tested with an injected fake `fetch` — no live network in the test suite.
@@ -19,6 +19,9 @@ agents. See `docs/design-001-research-first-work-gate.md` for the architecture.
   (typecheck) includes them.
 
 ## Architecture invariant
-All model reasoning lives host-side; the hosted service (`sage.rematcha.dev`) is a
-pure, stateless data API. Private package names never leave the machine — see
-`src/scanner/classify.ts` (public-coordinate classification).
+All model reasoning lives in the agent; the hosted service (`sage.rematcha.dev`) is a
+pure, stateless data API (`src/data/`, exposed via `src/mcp/server.ts`). There is no
+local scanner/CLI — the `/work` skill (`work/SKILL.md`) has the agent read the
+project's manifest itself, which is why every ecosystem works without a parser.
+Private package names never leave the machine: the skill instructs the agent to send
+only public package names to the service.

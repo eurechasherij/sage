@@ -3,7 +3,7 @@ import { request, type FetchFn } from "./http.js";
 import { normalizeVuln, queryOsv } from "./osv.js";
 import { searchNpm, npmHealthBits } from "./npm-registry.js";
 import { packagistHealthBits } from "./packagist.js";
-import { getHealth, getDocsSources } from "./index.js";
+import { getHealth, getDocsSources, searchPackages } from "./index.js";
 
 interface Route {
   match: (url: string) => boolean;
@@ -165,5 +165,46 @@ describe("getDocsSources", () => {
     const d = getDocsSources("composer", "laravel/pennant");
     expect(d.sources[0]?.url).toBe("https://packagist.org/packages/laravel/pennant");
     expect(d.versionConfidence).toBe("unknown");
+  });
+
+  it("maps the new ecosystems to their registry pages", () => {
+    expect(getDocsSources("pypi", "httpx").sources[0]?.url).toBe("https://pypi.org/project/httpx/");
+    expect(getDocsSources("cargo", "serde").sources[0]?.url).toBe("https://crates.io/crates/serde");
+    expect(getDocsSources("go", "github.com/gin-gonic/gin").sources[0]?.url).toBe("https://pkg.go.dev/github.com/gin-gonic/gin");
+    expect(getDocsSources("rubygems", "rails").sources[0]?.url).toBe("https://rubygems.org/gems/rails");
+  });
+});
+
+describe("searchPackages across ecosystems", () => {
+  it("normalizes crates.io search", async () => {
+    const fetchFn = router([
+      { match: (u) => u.includes("crates.io/api/v1/crates"), body: { crates: [{ name: "serde", max_stable_version: "1.0.0", description: "ser/de", repository: "https://github.com/serde-rs/serde", downloads: 9 }] } },
+    ]);
+    const res = await searchPackages("cargo", "serialization", { fetchFn });
+    expect(res.ok && res.data[0]).toMatchObject({ name: "serde", ecosystem: "cargo", version: "1.0.0" });
+  });
+
+  it("normalizes rubygems search", async () => {
+    const fetchFn = router([
+      { match: (u) => u.includes("rubygems.org/api/v1/search.json"), body: [{ name: "rails", version: "7.1.0", info: "web", downloads: 5 }] },
+    ]);
+    const res = await searchPackages("rubygems", "web framework", { fetchFn });
+    expect(res.ok && res.data[0]).toMatchObject({ name: "rails", ecosystem: "rubygems", version: "7.1.0" });
+  });
+
+  it("returns empty for ecosystems without a clean search API (pypi/go)", async () => {
+    const res = await searchPackages("pypi", "http client");
+    expect(res).toEqual({ ok: true, data: [] });
+  });
+
+  it("getHealth for a non-bits ecosystem returns OSV advisories only", async () => {
+    const fetchFn = router([
+      { match: (u) => u.includes("api.osv.dev"), body: { vulns: [{ id: "PYSEC-1", database_specific: { severity: "HIGH" } }] } },
+    ]);
+    const h = await getHealth("pypi", "somepkg", "1.0.0", { fetchFn });
+    expect(h.advisories[0]?.id).toBe("PYSEC-1");
+    expect(h.lastPublish).toBeUndefined();
+    // no OSV-degraded -> the floor can still evaluate
+    expect(h.degraded.some((d) => d.source === "osv")).toBe(false);
   });
 });
