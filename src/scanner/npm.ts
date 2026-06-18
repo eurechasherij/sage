@@ -1,0 +1,86 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { isNpmPublic } from "./classify.js";
+import type { InstalledPackage } from "./types.js";
+
+interface LockNode {
+  version?: string;
+  resolved?: string;
+  link?: boolean;
+}
+
+interface PackageLock {
+  lockfileVersion?: number;
+  packages?: Record<string, LockNode>;
+}
+
+const NM = "node_modules/";
+
+/**
+ * Parse an npm project (package.json + package-lock.json, lockfileVersion 2/3).
+ * Returns one entry per installed package, deduped by name, sorted by name.
+ * Returns [] if there is no package-lock.json to read.
+ */
+export async function scanNpm(root: string): Promise<InstalledPackage[]> {
+  let lockRaw: string;
+  try {
+    lockRaw = await readFile(join(root, "package-lock.json"), "utf8");
+  } catch {
+    return [];
+  }
+
+  const lock = JSON.parse(lockRaw) as PackageLock;
+  if (!lock.packages) return []; // lockfileVersion 1 not supported yet
+
+  const direct = await readDirectDeps(root);
+  const found: InstalledPackage[] = [];
+
+  for (const [key, node] of Object.entries(lock.packages)) {
+    if (key === "" || !key.includes(NM)) continue;
+    const name = key.slice(key.lastIndexOf(NM) + NM.length);
+    if (!name) continue;
+    if (!node.version && !node.link) continue;
+    found.push({
+      name,
+      version: node.version ?? "",
+      ecosystem: "npm",
+      direct: direct.has(name),
+      publicCoordinate: isNpmPublic(node.resolved, node.link),
+      resolved: node.resolved,
+    });
+  }
+
+  return dedupeByName(found);
+}
+
+async function readDirectDeps(root: string): Promise<Set<string>> {
+  const names = new Set<string>();
+  try {
+    const pj = JSON.parse(await readFile(join(root, "package.json"), "utf8")) as Record<
+      string,
+      Record<string, string> | undefined
+    >;
+    for (const field of [
+      "dependencies",
+      "devDependencies",
+      "optionalDependencies",
+      "peerDependencies",
+    ]) {
+      const deps = pj[field];
+      if (deps) for (const n of Object.keys(deps)) names.add(n);
+    }
+  } catch {
+    // no/invalid package.json — direct set stays empty
+  }
+  return names;
+}
+
+/** A package name can appear at multiple paths/versions; keep one, prefer the direct entry. */
+function dedupeByName(pkgs: InstalledPackage[]): InstalledPackage[] {
+  const byName = new Map<string, InstalledPackage>();
+  for (const p of pkgs) {
+    const cur = byName.get(p.name);
+    if (!cur || (p.direct && !cur.direct)) byName.set(p.name, p);
+  }
+  return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
