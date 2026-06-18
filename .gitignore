@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.*
+
+# Build output
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Env & secrets (never commit the OpenAI / API keys)
+.env
+.env.*
+!.env.example
+*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Caches (SAGE server-side cache, test, build)
+.cache/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
+coverage/
+.nyc_output/
+.vitest/
+
+# gstack local tooling state (planning artifacts live in ~/.gstack, not the repo)
+.gstack/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Misc
+tmp/
+*.tgz
