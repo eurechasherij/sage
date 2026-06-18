@@ -8,6 +8,28 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 HOSTED_MCP="https://sage.rematcha.dev/mcp"
 
+# Make the /work skill discoverable.
+# Claude Code only discovers skills one level deep (~/.claude/skills/<name>/SKILL.md)
+# and skips a repo-shaped clone whose own SKILL.md is nested. SAGE clones to
+# ~/.claude/skills/sage, so its work/SKILL.md (two levels deep) is never found.
+# Fix it the gstack way: create a real top-level dir with the SKILL.md symlinked
+# back into the clone. The dir name (= the skill's frontmatter `name:`) is the
+# slash command, so this yields /work.
+SKILLS_DIR="$HOME/.claude/skills"
+SKILL_SRC="$DIR/work/SKILL.md"
+if [ -f "$SKILL_SRC" ]; then
+  SKILL_NAME="$(grep -m1 '^name:' "$SKILL_SRC" | sed 's/^name:[[:space:]]*//' | tr -d '[:space:]')"
+  [ -z "$SKILL_NAME" ] && SKILL_NAME="work"
+  TARGET="$SKILLS_DIR/$SKILL_NAME"
+  [ -L "$TARGET" ] && rm -f "$TARGET"
+  mkdir -p "$TARGET"
+  [ -L "$TARGET/SKILL.md" ] && rm -f "$TARGET/SKILL.md"
+  ln -sf "$SKILL_SRC" "$TARGET/SKILL.md"
+  echo "✓ Linked /$SKILL_NAME skill -> $TARGET/SKILL.md"
+else
+  echo "• Could not find work/SKILL.md; skipping skill link."
+fi
+
 if command -v claude >/dev/null 2>&1; then
   if claude mcp add --scope user --transport http sage "$HOSTED_MCP" 2>/dev/null; then
     echo "✓ Registered the 'sage' MCP -> $HOSTED_MCP (user scope)."
