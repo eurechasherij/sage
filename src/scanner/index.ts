@@ -1,6 +1,7 @@
 import { access } from "node:fs/promises";
 import { join } from "node:path";
 import { scanNpm } from "./npm.js";
+import { scanComposer } from "./composer.js";
 import type { Ecosystem, InstalledPackage, ScanResult } from "./types.js";
 
 async function exists(p: string): Promise<boolean> {
@@ -28,8 +29,13 @@ export async function scanProject(root: string): Promise<ScanResult> {
     }
   }
 
-  // TODO(E1b): composer.lock support (composer.json `repositories` + path/vcs
-  // classification for the public-coordinate decision).
+  if (await exists(join(root, "composer.lock"))) {
+    const composer = await scanComposer(root);
+    if (composer.length) {
+      ecosystems.push("composer");
+      packages.push(...composer);
+    }
+  }
 
   return { root, ecosystems, packages };
 }
