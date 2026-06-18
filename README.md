@@ -16,8 +16,7 @@ It exists because of two real failures it prevents:
 HOST (your machine / the agent)          SERVICE (sage.rematcha.dev — pure data)
   /work skill ........ the gate           search_packages
   sage scan .......... installed deps     check_package_health(_batch)
-  sage match ......... reuse candidates    get_package_docs
-  evaluateFloor ...... auto-install gate
+  evaluateFloor ...... auto-install gate   get_package_docs
   decision artifact .. .sage/decisions/
 ```
 
@@ -42,13 +41,13 @@ the scanner the skill runs has no dependencies. (Bun is required to run the scan
 no global CLI to install:
 
 ```
-bun run ~/.claude/skills/sage/src/cli.ts scan                 # installed deps + public-coordinate flags
-bun run ~/.claude/skills/sage/src/cli.ts match "<capability>" # installed packages that may already cover it
+bun run ~/.claude/skills/sage/src/cli.ts scan   # installed deps + public-coordinate flags
 ```
 
-`scan` is the privacy boundary in code (decides what is safe to send to the MCP);
-the skill calls it so the agent never re-implements lockfile parsing or eyeballs
-"is this package private". The same logic backs the future CI/hook enforcement.
+`scan` is the privacy boundary in code (decides what is safe to send to the MCP)
+and parses every lockfile format, so the agent never re-implements parsing or
+eyeballs "is this package private". The agent matches capabilities to the scanned
+packages itself; the same scan logic backs the CI/hook enforcement.
 
 ## Deploy the MCP service (Cloudflare Workers, push-to-deploy)
 

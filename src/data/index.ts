@@ -43,9 +43,8 @@ export const getHealth = async (
 
 /**
  * Canonical documentation sources for a package. Pure URL construction — the host
- * model fetches + reads these and decides relevance. Without Context7 wired, the
- * version confidence is "approximate" (registry/repo pages track latest, not the
- * installed version); wiring Context7 later upgrades it to "exact".
+ * model fetches + reads these and decides relevance. Confidence is "approximate"
+ * because registry/repo pages track the latest version, not the installed one.
  */
 export const getDocsSources = (
   ecosystem: Ecosystem,

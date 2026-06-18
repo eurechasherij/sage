@@ -49,7 +49,7 @@ export const createServer = (): McpServer => {
     "get_package_docs",
     {
       description:
-        "Canonical documentation source URLs for a package (registry page + repo). The caller fetches and reads them. versionConfidence is 'approximate' until Context7 is wired.",
+        "Canonical documentation source URLs for a package (registry page + repo). The caller fetches and reads them. versionConfidence is 'approximate' (pages track the latest version).",
       inputSchema: {
         ecosystem,
         name: z.string(),

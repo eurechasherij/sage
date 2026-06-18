@@ -26,9 +26,9 @@ export interface DocsSources {
   name: string;
   ecosystem: Ecosystem;
   version?: string;
-  sources: { url: string; kind: "registry" | "repo" | "context7" }[];
-  /** exact only when Context7 (or a versioned docs source) is wired; else approximate */
-  versionConfidence: "exact" | "approximate" | "unknown";
+  sources: { url: string; kind: "registry" | "repo" }[];
+  /** "approximate": registry/repo pages track the latest, not the installed version */
+  versionConfidence: "approximate" | "unknown";
 }
 
 export interface PackageHealth {

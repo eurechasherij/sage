@@ -11,7 +11,6 @@ data (search / health / docs). Local file scanning runs via Bun straight from th
 installed skill, no build:
 
     bun run ~/.claude/skills/sage/src/cli.ts scan
-    bun run ~/.claude/skills/sage/src/cli.ts match "<capability>"
 
 Default posture is **stop-and-ask**. You only auto-decide package choices when the
 user explicitly passed `--ai-decides` (or set it in config). Even then, never
@@ -30,10 +29,10 @@ auto-ADD a package that fails the safety floor — fall back to asking.
    `publicCoordinate: true` may be sent to the MCP. Never transmit names where it is
    `false` (private/workspace).
 
-3. **For each capability, find reuse candidates already installed:**
-   `bun run ~/.claude/skills/sage/src/cli.ts match "<capability>"` → installed
-   packages that may already cover it. This is the SWR/Pennant case — if something is
-   installed, prefer it.
+3. **For each capability, match it against the scanned installed packages yourself**
+   — pick the ones that may already cover it (e.g. a "data fetching" capability →
+   an installed `swr`; a "feature flag" capability → an installed `laravel/pennant`).
+   This is the SWR/Pennant case — if something is installed, prefer it.
 
 4. **Read the docs for installed hits** before deciding: call `get_package_docs`
    (MCP) for each candidate and read the returned source URLs. Confirm the package

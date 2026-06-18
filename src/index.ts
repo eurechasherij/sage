@@ -8,10 +8,6 @@ export type { PackageCandidate, PackageHealth, DocsSources, Advisory, Severity }
 export { evaluateFloor } from "./policy/floor.js";
 export type { FloorPolicy, FloorVerdict } from "./policy/floor.js";
 
-export { matchInstalled } from "./capability/match.js";
-export { DEFAULT_ALIASES } from "./capability/aliases.js";
-export type { Alias } from "./capability/aliases.js";
-
 export { taskKey } from "./decision/taskkey.js";
 export {
   buildArtifact,

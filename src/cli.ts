@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import { readFile } from "node:fs/promises";
-import { matchInstalled } from "./capability/match.js";
 import { scanProject } from "./scanner/index.js";
 import { analyzeReplay, type ReplayEntry } from "./replay/analyze.js";
 
@@ -11,7 +10,6 @@ import { analyzeReplay, type ReplayEntry } from "./replay/analyze.js";
 const usage = `sage — research-first work gate (host-side primitives)
 
   sage scan [dir]                 list installed deps + public-coordinate flags
-  sage match "<capability>" [dir] installed packages that may already cover it
   sage replay <file.jsonl>        calibrate world-search depth from tagged tasks
 `;
 
@@ -21,18 +19,6 @@ const run = async (): Promise<void> => {
 
   if (cmd === "scan") {
     console.log(JSON.stringify(await scanProject(dirOf(0)), null, 2));
-    return;
-  }
-
-  if (cmd === "match") {
-    const capability = rest[0];
-    if (!capability) {
-      console.error('usage: sage match "<capability>" [dir]');
-      process.exitCode = 1;
-      return;
-    }
-    const { packages } = await scanProject(dirOf(1));
-    console.log(JSON.stringify(matchInstalled(capability, packages), null, 2));
     return;
   }
 
