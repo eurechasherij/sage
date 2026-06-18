@@ -10,10 +10,6 @@ It exists because of two real failures it prevents:
 - an agent invented a Laravel Pennant workaround instead of the **documented
   `intercept` API**.
 
-See [`docs/design-001-research-first-work-gate.md`](docs/design-001-research-first-work-gate.md)
-for the full design and [`docs/design-002-landing-page.md`](docs/design-002-landing-page.md)
-for the landing page.
-
 ## How it fits together
 
 ```
@@ -33,14 +29,12 @@ deps.dev / OSV / npm / Packagist. Private package names never leave the machine
 
 Requires [Bun](https://bun.sh). Open Claude Code and paste:
 
-> Install SAGE: run `git clone --single-branch --depth 1 <SAGE_REPO_URL> ~/.claude/skills/sage && cd ~/.claude/skills/sage && ./setup`, then add a "sage" section to CLAUDE.md saying to run the `/work` skill before implementing any ticket in an npm or composer project. Then ask me if I also want SAGE added to the current project for teammates.
+> Install SAGE: run `git clone --single-branch --depth 1 https://github.com/eurechasherij/sage.git ~/.claude/skills/sage && cd ~/.claude/skills/sage && ./setup`, then add a "sage" section to CLAUDE.md saying to run the `/work` skill before implementing any ticket in an npm or composer project. Then ask me if I also want SAGE added to the current project for teammates.
 
 That clones SAGE into `~/.claude/skills/sage` and registers the hosted `sage` MCP
 (`https://sage.rematcha.dev/mcp`). The `/work` skill is then available everywhere.
 Nothing to build, no `bun install`, no local server — the data service is hosted and
 the scanner the skill runs has no dependencies. (Bun is required to run the scanner.)
-
-(`<SAGE_REPO_URL>` = `https://github.com/eurechasherij/sage.git`.)
 
 ## The host-side engine (run by the skill, not by you)
 
