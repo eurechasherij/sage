@@ -69,6 +69,24 @@ Local checks before pushing: `bun run typecheck`, `bunx wrangler deploy --dry-ru
 (bundles without deploying), `bun run dev:worker` (runs it locally on
 `http://localhost:8787/mcp`).
 
+## Enforcement (optional — make the gate a hard wall)
+
+By default `/work` is a strong convention. To make it non-skippable:
+
+- **PreToolUse hook (local):** blocks editing source code until a research decision
+  (`.sage/decisions/`) exists. Add to `~/.claude/settings.json`:
+  ```json
+  { "hooks": { "PreToolUse": [ { "matcher": "Edit|Write|MultiEdit",
+    "hooks": [ { "type": "command",
+      "command": "bun run ~/.claude/skills/sage/hooks/pre-tool-use.ts" } ] } ] } }
+  ```
+  Escape hatch: `SAGE_GATE=off`.
+- **CI check (PR-time):** copy `templates/sage-gate.yml` to a repo's
+  `.github/workflows/` — it fails a PR that changed source without a decision,
+  catching the skip before CI spend piles up.
+
+Both are thin wrappers over the tested `src/enforce/gate.ts`.
+
 ## Develop
 
 This project uses [Bun](https://bun.sh).

@@ -1,0 +1,20 @@
+# Optional: SAGE research gate as a CI check. Copy to .github/workflows/ in a repo
+# you want to enforce. Fails a PR when source files changed without a SAGE research
+# decision (.sage/decisions/), catching the skip before CI/Actions spend piles up.
+name: SAGE research gate
+on: pull_request
+
+jobs:
+  sage-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # need the base branch for the diff
+      - uses: oven-sh/setup-bun@v2
+      - name: Fetch SAGE
+        run: git clone --single-branch --depth 1 https://github.com/eurechasherij/sage.git "$RUNNER_TEMP/sage"
+      - name: Run the gate
+        run: bun run "$RUNNER_TEMP/sage/hooks/ci-check.ts"
+        env:
+          SAGE_BASE_REF: origin/${{ github.base_ref }}
