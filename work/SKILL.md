@@ -6,8 +6,12 @@ description: Research-first work gate. Before writing code for a ticket, SAGE ch
 # /work — research before code
 
 You are running SAGE's research gate. The rule: **no implementation code is written
-until a research decision exists.** The agent (you) does all the reasoning;
-`sage.rematcha.dev` (the MCP) is pure data; `sage` (the CLI) reads local files.
+until a research decision exists.** You do all the reasoning. The `sage` MCP is pure
+data (search / health / docs). Local file scanning runs via Bun straight from the
+installed skill, no build:
+
+    bun run ~/.claude/skills/sage/src/cli.ts scan
+    bun run ~/.claude/skills/sage/src/cli.ts match "<capability>"
 
 Default posture is **stop-and-ask**. You only auto-decide package choices when the
 user explicitly passed `--ai-decides` (or set it in config). Even then, never
@@ -21,13 +25,15 @@ auto-ADD a package that fails the safety floor — fall back to asking.
    that as a directive (still research them in step 4/6, still apply the floor).
 
 2. **Scan the project** (host-side, local files):
-   `sage scan` → installed packages with versions, direct/transitive, and a
-   `publicCoordinate` flag. Only packages with `publicCoordinate: true` may be sent
-   to the service. Never transmit names where it is `false` (private/workspace).
+   `bun run ~/.claude/skills/sage/src/cli.ts scan` → installed packages with
+   versions, direct/transitive, and a `publicCoordinate` flag. Only packages with
+   `publicCoordinate: true` may be sent to the MCP. Never transmit names where it is
+   `false` (private/workspace).
 
 3. **For each capability, find reuse candidates already installed:**
-   `sage match "<capability>"` → installed packages that may already cover it.
-   This is the SWR/Pennant case — if something is installed, prefer it.
+   `bun run ~/.claude/skills/sage/src/cli.ts match "<capability>"` → installed
+   packages that may already cover it. This is the SWR/Pennant case — if something is
+   installed, prefer it.
 
 4. **Read the docs for installed hits** before deciding: call `get_package_docs`
    (MCP) for each candidate and read the returned source URLs. Confirm the package

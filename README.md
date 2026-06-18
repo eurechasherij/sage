@@ -29,22 +29,31 @@ All model reasoning is host-side. The service is a thin, stateless aggregator ov
 deps.dev / OSV / npm / Packagist. Private package names never leave the machine
 (`src/scanner/classify.ts`).
 
-## Install (for an agent project)
+## Install (one paste into Claude Code)
 
-1. Add the MCP server. Production (hosted): point your agent at
-   `https://sage.rematcha.dev/mcp`. Local/dev: `bun run dev:mcp` (runs the TS
-   directly), or `node dist/mcp/stdio.js` after a build.
-2. Copy `skill/SKILL.md` into your agent's skills dir as `work/SKILL.md`, then run
-   `/work <ticket>`.
+Requires [Bun](https://bun.sh). Open Claude Code and paste:
 
-## CLI
+> Install SAGE: run `git clone --single-branch --depth 1 <SAGE_REPO_URL> ~/.claude/skills/sage && cd ~/.claude/skills/sage && ./setup`, then add a "sage" section to CLAUDE.md saying to run the `/work` skill before implementing any ticket in an npm or composer project. Then ask me if I also want SAGE added to the current project for teammates.
+
+That clones SAGE into `~/.claude/skills/sage`, installs deps (no build — Bun runs
+the TypeScript directly), and registers the `sage` MCP. The `/work` skill is then
+available everywhere. There is nothing to build and no per-project pull.
+
+(`<SAGE_REPO_URL>` is this repo's git remote — push it to GitHub first.)
+
+## The host-side engine (run by the skill, not by you)
+
+`/work` reads local lockfiles by running the bundled TypeScript via Bun — no build,
+no global CLI to install:
 
 ```
-bun run src/cli.ts scan [dir]                 # installed deps + public-coordinate flags
-bun run src/cli.ts match "<capability>" [dir] # installed packages that may already cover it
+bun run ~/.claude/skills/sage/src/cli.ts scan                 # installed deps + public-coordinate flags
+bun run ~/.claude/skills/sage/src/cli.ts match "<capability>" # installed packages that may already cover it
 ```
 
-(After `bun run build`, the `sage` / `sage-mcp` bins run the compiled `dist/`.)
+`scan` is the privacy boundary in code (decides what is safe to send to the MCP);
+the skill calls it so the agent never re-implements lockfile parsing or eyeballs
+"is this package private". The same logic backs the future CI/hook enforcement.
 
 ## Develop
 
