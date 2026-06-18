@@ -84,6 +84,25 @@ export const isComposerPublic = (pkg: ComposerPkgSrc, ctx: ComposerCtx): boolean
   return true;
 }
 
+// Bun: descriptors carry the resolution protocol. Non-registry protocols
+// (workspace/file/link/git/url) are private. A plain version or an `npm:` alias
+// comes from the default npm registry = public, unless the package's scope is
+// configured to a custom registry in bunfig.toml [install.scopes].
+const NON_REGISTRY_PROTOCOLS = new Set(["workspace", "file", "link", "git", "url"]);
+
+export const isBunPublic = (
+  name: string,
+  protocol: string,
+  privateScopes: Set<string>,
+): boolean => {
+  if (NON_REGISTRY_PROTOCOLS.has(protocol)) return false;
+  if (name.startsWith("@")) {
+    const scope = name.slice(0, name.indexOf("/"));
+    if (scope && privateScopes.has(scope)) return false;
+  }
+  return true;
+};
+
 /** Build classification context from composer.json `repositories`. */
 export const composerCtxFromRepositories = (repositories: unknown): ComposerCtx => {
   const privateRepoUrls = new Set<string>();
