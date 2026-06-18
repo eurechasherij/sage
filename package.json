@@ -4,6 +4,15 @@
   "description": "Software Advisory & Guidance Engine — a research-first work gate for coding agents",
   "type": "module",
   "private": true,
+  "bin": {
+    "sage": "dist/cli.js",
+    "sage-mcp": "dist/mcp/stdio.js"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./scanner": "./dist/scanner/index.js",
+    "./data": "./dist/data/index.js"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
