@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SAGE — research before code</title>
+<style>
+  :root{
+    --bg:#0a0c0d; --panel:#111416; --panel2:#0e1112; --ink:#e8ece9; --muted:#8a938d;
+    --line:#1d2426; --accent:#46d39a; --accent-dim:#1c3b30; --red:#ff6b5e; --red-dim:#2a1714;
+    --mono:ui-monospace,SFMono-Regular,Menlo,"JetBrains Mono",monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 32px}
+  a{color:inherit;text-decoration:none}
+  .mono{font-family:var(--mono)}
+
+  /* top bar */
+  nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:baseline;gap:12px}
+  .brand b{font-size:20px;letter-spacing:.18em;font-weight:600}
+  .brand span{color:var(--muted);font-size:12.5px;letter-spacing:.02em}
+  .navcta{font-family:var(--mono);font-size:13px;color:var(--accent);border:1px solid var(--accent-dim);padding:7px 13px;border-radius:7px}
+
+  /* hero */
+  .hero{padding:96px 0 72px;max-width:880px}
+  .eyebrow{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.04em;margin-bottom:22px}
+  h1{font-size:54px;line-height:1.05;font-weight:600;letter-spacing:-.02em}
+  h1 em{font-style:normal;color:var(--accent)}
+  .sub{margin-top:24px;font-size:19px;color:var(--muted);max-width:660px;line-height:1.5}
+  .cta{margin-top:38px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .install{font-family:var(--mono);font-size:14px;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:14px 18px;display:flex;align-items:center;gap:14px}
+  .install .pfx{color:var(--muted)}
+  .install .cmd{color:var(--ink)}
+  .install .copy{color:var(--muted);font-size:12px;border-left:1px solid var(--line);padding-left:14px}
+  .ghost{font-size:14px;color:var(--muted)}
+  .ghost b{color:var(--ink);font-weight:500}
+
+  /* section scaffold */
+  section{padding:64px 0;border-top:1px solid var(--line)}
+  .kicker{font-family:var(--mono);font-size:12.5px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+  h2{font-size:30px;font-weight:600;letter-spacing:-.01em}
+  .lead{color:var(--muted);font-size:16.5px;margin-top:10px;max-width:640px}
+
+  /* proof */
+  .proof{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:34px}
+  .case{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .case h3{font-size:15px;font-weight:600;padding:16px 20px 4px}
+  .case .what{padding:0 20px 14px;color:var(--muted);font-size:13.5px}
+  .code{font-family:var(--mono);font-size:12.5px;line-height:1.6;padding:16px 20px;border-top:1px solid var(--line);white-space:pre;overflow-x:auto}
+  .bad{border-bottom:1px solid var(--line)}
+  .tag{font-family:var(--mono);font-size:11px;letter-spacing:.06em;padding:3px 8px;border-radius:5px;display:inline-block;margin-bottom:8px}
+  .tag.red{color:var(--red);background:var(--red-dim)}
+  .tag.grn{color:var(--accent);background:var(--accent-dim)}
+  .c-red{color:var(--red)} .c-grn{color:var(--accent)} .c-mut{color:var(--muted)}
+
+  /* how */
+  .cmdbar{font-family:var(--mono);font-size:15px;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:16px 20px;margin-top:28px}
+  .cmdbar .accent{color:var(--accent)}
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:26px}
+  .step{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:18px}
+  .step .n{font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:10px}
+  .step .t{font-size:14.5px;font-weight:500;margin-bottom:6px}
+  .step .d{font-size:13px;color:var(--muted);line-height:1.45}
+
+  /* what it is */
+  .feats{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:30px}
+  .feat .t{font-size:15px;font-weight:600;margin-bottom:6px}
+  .feat .d{font-size:14px;color:var(--muted)}
+
+  /* footer cta */
+  .foot{padding:80px 0;border-top:1px solid var(--line);text-align:center}
+  .foot h2{font-size:34px}
+  .foot .sub{margin:14px auto 30px}
+  .foot .install{display:inline-flex}
+  footer{border-top:1px solid var(--line);padding:26px 0;color:var(--muted);font-size:13px;display:flex;justify-content:space-between}
+
+  /* rolling package name */
+  .roll{display:inline-block;height:1.05em;line-height:1.05;overflow:hidden;vertical-align:bottom;color:var(--accent)}
+  .roll__list{display:flex;flex-direction:column;animation:roll 9s cubic-bezier(.7,0,.3,1) infinite}
+  .roll__list b{display:block;height:1.05em;line-height:1.05;font-weight:600}
+  @keyframes roll{
+    0%,11%{transform:translateY(0)}
+    14%,27%{transform:translateY(-1.05em)}
+    30%,44%{transform:translateY(-2.1em)}
+    47%,60%{transform:translateY(-3.15em)}
+    63%,77%{transform:translateY(-4.2em)}
+    80%,94%{transform:translateY(-5.25em)}
+    100%{transform:translateY(-6.3em)}
+  }
+  @media (prefers-reduced-motion:reduce){.roll__list{animation:none}}
+
+  /* copied state */
+  .install .copy{cursor:pointer;transition:color .15s}
+  .install .copy:hover{color:var(--ink)}
+  .install .copy.done{color:var(--accent)}
+
+  /* responsive */
+  @media (max-width:760px){
+    .wrap{padding:0 20px}
+    h1{font-size:36px}
+    .hero{padding:64px 0 48px}
+    .sub{font-size:17px}
+    .proof{grid-template-columns:1fr}
+    .steps{grid-template-columns:1fr 1fr}
+    .feats{grid-template-columns:1fr}
+    .install{flex-wrap:wrap}
+    footer{flex-direction:column;gap:8px}
+  }
+  @media (max-width:460px){.steps{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <div class="brand"><b>SAGE</b><span>Software Advisory &amp; Guidance Engine</span></div>
+    <div class="navcta mono">sage.rematcha.dev</div>
+  </nav>
+
+  <header class="hero">
+    <div class="eyebrow">// research before code</div>
+    <h1>Your AI agent ignored the <span class="roll" aria-label="SWR, Zustand, dayjs, and other packages"><span class="roll__list"><b>SWR</b><b>Zustand</b><b>dayjs</b><b>decimal.js</b><b>Zod</b><b>date-fns</b><b>SWR</b></span></span> you already installed.</h1>
+    <p class="sub">SAGE makes coding agents research before they write. It checks what is already in your project, reads the version-pinned docs, and compares packages, then lets the code happen. One install, any stack.</p>
+    <div class="cta">
+      <div class="install mono"><span class="pfx">$</span><span class="cmd">claude mcp add sage https://sage.rematcha.dev/mcp</span><span class="copy">copy</span></div>
+      <a class="ghost" href="#how">see how <b>/work</b> runs &rsaquo;</a>
+    </div>
+  </header>
+
+  <section id="proof">
+    <div class="kicker">Real failures SAGE catches</div>
+    <h2>The agent had the answer. It just didn't look.</h2>
+    <p class="lead">Two things that actually happened. Both were already solved in the project. The agent reinvented them anyway, and you found out an hour later.</p>
+    <div class="proof">
+      <div class="case">
+        <h3>React data fetching</h3>
+        <div class="what">SWR was already a dependency.</div>
+        <div class="code bad"><span class="tag red">WHAT THE AGENT SHIPPED</span>
+<span class="c-mut">// hand-rolled polling</span>
+useEffect(() =&gt; {
+  const id = setInterval(() =&gt; {
+    fetch(url).then(setData)
+  }, 5000)
+  return () =&gt; clearInterval(id)
+}, [url])</div>
+        <div class="code"><span class="tag grn">WHAT SAGE SURFACES FIRST</span>
+<span class="c-mut">// swr is installed — use it</span>
+const { data } = useSWR(url, {
+  refreshInterval: 5000
+})</div>
+      </div>
+      <div class="case">
+        <h3>Laravel Pennant flags</h3>
+        <div class="what">Pennant ships the exact API.</div>
+        <div class="code bad"><span class="tag red">WHAT THE AGENT SHIPPED</span>
+<span class="c-mut">// custom beta-user workaround</span>
+if ($user-&gt;is_beta &amp;&amp;
+    Cache::get("ff_$flag")) {
+  // ...re-implements Pennant
+}</div>
+        <div class="code"><span class="tag grn">WHAT SAGE SURFACES FIRST</span>
+<span class="c-mut">// documented intercept API</span>
+Feature::resolveValue(fn ($f) =&gt;
+  $f-&gt;active &amp;&amp; $user-&gt;beta
+);</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="kicker">How it works</div>
+    <h2>One command. Research is not optional.</h2>
+    <div class="cmdbar mono"><span class="accent">/work</span> <span class="c-mut">PROJ-412 — add polling to the dashboard</span></div>
+    <div class="steps">
+      <div class="step"><div class="n">01</div><div class="t">Scan the project</div><div class="d">Reads your lockfiles. Knows what is already installed, and the versions.</div></div>
+      <div class="step"><div class="n">02</div><div class="t">Read the right docs</div><div class="d">Pulls version-pinned docs for what you have, finds the documented API.</div></div>
+      <div class="step"><div class="n">03</div><div class="t">You or AI decide</div><div class="d">Reuse, add, or avoid a package. Defaults to asking you; safety floor on auto-add.</div></div>
+      <div class="step"><div class="n">04</div><div class="t">Then implement</div><div class="d">Code starts only after a written research decision exists.</div></div>
+    </div>
+  </section>
+
+  <section id="what">
+    <div class="kicker">What it is</div>
+    <h2>One hosted engine. No per-framework setup.</h2>
+    <div class="feats">
+      <div class="feat"><div class="t">Single install</div><div class="d">One MCP endpoint at sage.rematcha.dev. Not a server per project, not an MCP per framework.</div></div>
+      <div class="feat"><div class="t">Any stack</div><div class="d">JS/TS and PHP/Laravel today, more next. Your private package names never leave the machine.</div></div>
+      <div class="feat"><div class="t">Current, not stale</div><div class="d">Live package health and advisories from deps.dev and OSV, so suggestions are safe to trust.</div></div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <div class="kicker" style="text-align:center">Stop paying for the refactor later</div>
+    <h2>Make your agent look first.</h2>
+    <p class="sub" style="text-align:center">Add SAGE in one line. The next <span class="mono">/work</span> researches before it writes.</p>
+    <div class="install mono"><span class="pfx">$</span><span class="cmd">claude mcp add sage https://sage.rematcha.dev/mcp</span><span class="copy">copy</span></div>
+  </div>
+
+  <footer>
+    <span>SAGE — Software Advisory &amp; Guidance Engine</span>
+    <span class="mono">sage.rematcha.dev</span>
+  </footer>
+
+</div>
+<script>
+  document.querySelectorAll('.install').forEach(function(box){
+    var cmd = box.querySelector('.cmd').textContent.trim();
+    var btn = box.querySelector('.copy');
+    if(!btn) return;
+    btn.addEventListener('click', function(){
+      navigator.clipboard && navigator.clipboard.writeText(cmd);
+      var prev = btn.textContent;
+      btn.textContent = 'copied'; btn.classList.add('done');
+      setTimeout(function(){ btn.textContent = prev; btn.classList.remove('done'); }, 1600);
+    });
+  });
+</script>
+</body>
+</html>

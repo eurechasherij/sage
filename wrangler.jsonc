@@ -4,5 +4,8 @@
   "main": "src/worker.ts",
   "compatibility_date": "2026-06-01",
   "compatibility_flags": ["nodejs_compat"],
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  // Landing page served at / from ./public (static assets). Asset requests are
+  // served first; non-asset paths (e.g. /mcp) fall through to the Worker.
+  "assets": { "directory": "./public" }
 }
