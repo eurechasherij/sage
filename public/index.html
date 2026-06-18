@@ -124,7 +124,7 @@
   <header class="hero">
     <div class="eyebrow">// research before code</div>
     <h1>Your AI agent ignored the <span class="roll" aria-label="SWR, Zustand, dayjs, and other packages"><span class="roll__list"><b>SWR</b><b>Zustand</b><b>dayjs</b><b>decimal.js</b><b>Zod</b><b>date-fns</b><b>SWR</b></span></span> you already installed.</h1>
-    <p class="sub">SAGE makes coding agents research before they write. It checks what is already in your project, reads the version-pinned docs, and compares packages, then lets the code happen. One install, any stack.</p>
+    <p class="sub">SAGE makes coding agents research before they write. The agent reads what is already in your project, reuses it, checks the docs, and only then searches for something new. One install, any stack.</p>
     <div class="cta">
       <div class="install mono"><span class="pfx">$</span><span class="cmd">git clone --depth 1 https://github.com/eurechasherij/sage.git ~/.claude/skills/sage &amp;&amp; cd ~/.claude/skills/sage &amp;&amp; ./setup</span><span class="copy">copy</span></div>
       <a class="ghost" href="#how">see how <b>/work</b> runs &rsaquo;</a>
@@ -176,8 +176,8 @@ Feature::resolveValue(fn ($f) =&gt;
     <h2>One command. Research is not optional.</h2>
     <div class="cmdbar mono"><span class="accent">/work</span> <span class="c-mut">PROJ-412 — add polling to the dashboard</span></div>
     <div class="steps">
-      <div class="step"><div class="n">01</div><div class="t">Scan the project</div><div class="d">Reads your lockfiles. Knows what is already installed, and the versions.</div></div>
-      <div class="step"><div class="n">02</div><div class="t">Read the right docs</div><div class="d">Pulls version-pinned docs for what you have, finds the documented API.</div></div>
+      <div class="step"><div class="n">01</div><div class="t">Read the project</div><div class="d">The agent reads your manifest — npm, composer, pip, go, cargo, gem — and sees what is already installed.</div></div>
+      <div class="step"><div class="n">02</div><div class="t">Check the docs</div><div class="d">Reads the docs for what you have, finds the documented API before reinventing it.</div></div>
       <div class="step"><div class="n">03</div><div class="t">You or AI decide</div><div class="d">Reuse, add, or avoid a package. Defaults to asking you; safety floor on auto-add.</div></div>
       <div class="step"><div class="n">04</div><div class="t">Then implement</div><div class="d">Code starts only after a written research decision exists.</div></div>
     </div>
@@ -188,8 +188,8 @@ Feature::resolveValue(fn ($f) =&gt;
     <h2>One hosted engine. No per-framework setup.</h2>
     <div class="feats">
       <div class="feat"><div class="t">Single install</div><div class="d">One MCP endpoint at sage.rematcha.dev. Not a server per project, not an MCP per framework.</div></div>
-      <div class="feat"><div class="t">Any stack</div><div class="d">JS/TS and PHP/Laravel today, more next. Your private package names never leave the machine.</div></div>
-      <div class="feat"><div class="t">Current, not stale</div><div class="d">Live package health and advisories from deps.dev and OSV, so suggestions are safe to trust.</div></div>
+      <div class="feat"><div class="t">Any stack</div><div class="d">npm, bun, Composer, pip, Go, Cargo, RubyGems — the agent reads the manifest, so no per-ecosystem setup. Private package names never leave the machine.</div></div>
+      <div class="feat"><div class="t">Current, not stale</div><div class="d">Live advisories from OSV and health from the public registries, so suggestions are safe to trust.</div></div>
     </div>
   </section>
 
