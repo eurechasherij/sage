@@ -32,11 +32,11 @@ const DEFAULTS: Required<FloorPolicy> = {
 
 const DAY_MS = 86_400_000;
 
-export function evaluateFloor(
+export const evaluateFloor = (
   health: PackageHealth,
   policy: FloorPolicy = {},
   nowMs: number = Date.parse("1970-01-01T00:00:00Z"),
-): FloorVerdict {
+): FloorVerdict => {
   const p = { ...DEFAULTS, ...policy };
   const blockers: string[] = [];
   const warnings: string[] = [];

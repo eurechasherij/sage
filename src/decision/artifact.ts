@@ -41,11 +41,10 @@ export interface BuildInput {
   timestamp: string;
 }
 
-export function capabilitiesHash(capabilities: string[]): string {
-  return sha256([...capabilities].map((c) => c.trim().toLowerCase()).sort().join("\n"));
-}
+export const capabilitiesHash = (capabilities: string[]): string =>
+  sha256([...capabilities].map((c) => c.trim().toLowerCase()).sort().join("\n"));
 
-export function buildArtifact(i: BuildInput): DecisionArtifact {
+export const buildArtifact = (i: BuildInput): DecisionArtifact => {
   return {
     taskKey: i.taskKey,
     taskHash: sha256(i.taskText),
@@ -62,7 +61,7 @@ export function buildArtifact(i: BuildInput): DecisionArtifact {
 
 const DIR = ".sage/decisions";
 
-export async function writeArtifact(root: string, art: DecisionArtifact): Promise<string> {
+export const writeArtifact = async (root: string, art: DecisionArtifact): Promise<string> => {
   const dir = join(root, DIR);
   await mkdir(dir, { recursive: true });
   const jsonPath = join(dir, `${art.taskKey}.json`);
@@ -71,7 +70,10 @@ export async function writeArtifact(root: string, art: DecisionArtifact): Promis
   return jsonPath;
 }
 
-export async function readArtifact(root: string, taskKey: string): Promise<DecisionArtifact | null> {
+export const readArtifact = async (
+  root: string,
+  taskKey: string,
+): Promise<DecisionArtifact | null> => {
   try {
     const raw = await readFile(join(root, DIR, `${taskKey}.json`), "utf8");
     return JSON.parse(raw) as DecisionArtifact;
@@ -91,10 +93,10 @@ export interface ValidationInput {
  * lockfile, and capability set. This is what a PreToolUse hook / CI check uses —
  * mere file existence is not enough (a stale or forged file would pass that).
  */
-export function isArtifactValid(
+export const isArtifactValid = (
   art: DecisionArtifact,
   cur: ValidationInput,
-): { valid: boolean; mismatches: string[] } {
+): { valid: boolean; mismatches: string[] } => {
   const mismatches: string[] = [];
   if (art.taskHash !== sha256(cur.taskText)) mismatches.push("task text changed");
   if (art.lockfileHash !== sha256(cur.lockfileContent)) mismatches.push("lockfile changed");

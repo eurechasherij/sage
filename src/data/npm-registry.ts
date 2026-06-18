@@ -16,10 +16,10 @@ interface NpmSearchResponse {
   }[];
 }
 
-export async function searchNpm(
+export const searchNpm = async (
   query: string,
   opts?: HttpOpts,
-): Promise<Result<PackageCandidate[]>> {
+): Promise<Result<PackageCandidate[]>> => {
   const url = `https://registry.npmjs.org/-/v1/search?text=${encodeURIComponent(query)}&size=10`;
   const res = await request<NpmSearchResponse>(url, "npm", {}, opts);
   if (!res.ok) return res;
@@ -43,10 +43,10 @@ interface Packument {
   versions?: Record<string, { deprecated?: string }>;
 }
 
-export async function npmHealthBits(
+export const npmHealthBits = async (
   name: string,
   opts?: HttpOpts,
-): Promise<Result<{ version?: string; lastPublish?: string; deprecated: boolean }>> {
+): Promise<Result<{ version?: string; lastPublish?: string; deprecated: boolean }>> => {
   const encoded = encodeURIComponent(name).replace(/^%40/, "@"); // keep scope @, encode the slash
   const res = await request<Packument>(`https://registry.npmjs.org/${encoded}`, "npm", {}, opts);
   if (!res.ok) return res;

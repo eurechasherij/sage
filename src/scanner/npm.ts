@@ -21,7 +21,7 @@ const NM = "node_modules/";
  * Returns one entry per installed package, deduped by name, sorted by name.
  * Returns [] if there is no package-lock.json to read.
  */
-export async function scanNpm(root: string): Promise<InstalledPackage[]> {
+export const scanNpm = async (root: string): Promise<InstalledPackage[]> => {
   let lockRaw: string;
   try {
     lockRaw = await readFile(join(root, "package-lock.json"), "utf8");

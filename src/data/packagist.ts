@@ -13,10 +13,10 @@ interface PackagistSearch {
   }[];
 }
 
-export async function searchPackagist(
+export const searchPackagist = async (
   query: string,
   opts?: HttpOpts,
-): Promise<Result<PackageCandidate[]>> {
+): Promise<Result<PackageCandidate[]>> => {
   const url = `https://packagist.org/search.json?q=${encodeURIComponent(query)}&per_page=10`;
   const res = await request<PackagistSearch>(url, "packagist", {}, opts);
   if (!res.ok) return res;
@@ -37,10 +37,10 @@ interface P2Response {
   packages?: Record<string, { version: string; time?: string; abandoned?: boolean | string }[]>;
 }
 
-export async function packagistHealthBits(
+export const packagistHealthBits = async (
   name: string,
   opts?: HttpOpts,
-): Promise<Result<{ version?: string; lastPublish?: string; deprecated: boolean }>> {
+): Promise<Result<{ version?: string; lastPublish?: string; deprecated: boolean }>> => {
   const res = await request<P2Response>(
     `https://repo.packagist.org/p2/${name}.json`,
     "packagist",

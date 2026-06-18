@@ -27,12 +27,12 @@ export type Result<T> = { ok: true; data: T } | Degraded;
 
 const DEFAULT_TIMEOUT_MS = 8000;
 
-export async function request<T>(
+export const request = async <T>(
   url: string,
   source: string,
   init: ReqInit = {},
   opts: HttpOpts = {},
-): Promise<Result<T>> {
+): Promise<Result<T>> => {
   const fetchFn = opts.fetchFn ?? (globalThis.fetch as unknown as FetchFn);
   const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const ctrl = new AbortController();

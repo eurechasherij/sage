@@ -17,7 +17,7 @@ async function exists(p: string): Promise<boolean> {
  * Scan a project root for installed dependencies across supported ecosystems.
  * Host-side only: reads local lockfiles, never touches the network.
  */
-export async function scanProject(root: string): Promise<ScanResult> {
+export const scanProject = async (root: string): Promise<ScanResult> => {
   const ecosystems: Ecosystem[] = [];
   const packages: InstalledPackage[] = [];
 

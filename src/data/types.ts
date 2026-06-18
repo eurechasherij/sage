@@ -22,6 +22,15 @@ export interface PackageCandidate {
   repoUrl?: string;
 }
 
+export interface DocsSources {
+  name: string;
+  ecosystem: Ecosystem;
+  version?: string;
+  sources: { url: string; kind: "registry" | "repo" | "context7" }[];
+  /** exact only when Context7 (or a versioned docs source) is wired; else approximate */
+  versionConfidence: "exact" | "approximate" | "unknown";
+}
+
 export interface PackageHealth {
   name: string;
   ecosystem: Ecosystem;

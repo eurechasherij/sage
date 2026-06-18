@@ -3,7 +3,7 @@ import { request, type FetchFn } from "./http.js";
 import { normalizeVuln, queryOsv } from "./osv.js";
 import { searchNpm, npmHealthBits } from "./npm-registry.js";
 import { packagistHealthBits } from "./packagist.js";
-import { getHealth } from "./index.js";
+import { getHealth, getDocsSources } from "./index.js";
 
 interface Route {
   match: (url: string) => boolean;
@@ -148,5 +148,22 @@ describe("getHealth composition", () => {
     const h = await getHealth("npm", "foo", undefined, { fetchFn });
     expect(h.advisories).toEqual([]);
     expect(h.degraded.map((d) => d.source)).toContain("osv");
+  });
+});
+
+describe("getDocsSources", () => {
+  it("returns the npm page + repo with approximate confidence", () => {
+    const d = getDocsSources("npm", "swr", "2.2.5", "https://github.com/vercel/swr");
+    expect(d.sources.map((s) => s.url)).toEqual([
+      "https://www.npmjs.com/package/swr",
+      "https://github.com/vercel/swr",
+    ]);
+    expect(d.versionConfidence).toBe("approximate");
+  });
+
+  it("uses the packagist page for composer and is unknown without a version", () => {
+    const d = getDocsSources("composer", "laravel/pennant");
+    expect(d.sources[0]?.url).toBe("https://packagist.org/packages/laravel/pennant");
+    expect(d.versionConfidence).toBe("unknown");
   });
 });

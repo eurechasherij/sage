@@ -17,12 +17,12 @@ interface OsvResponse {
   vulns?: OsvVuln[];
 }
 
-export async function queryOsv(
+export const queryOsv = async (
   ecosystem: Ecosystem,
   name: string,
   version: string | undefined,
   opts?: HttpOpts,
-): Promise<Result<Advisory[]>> {
+): Promise<Result<Advisory[]>> => {
   const pkg = { name, ecosystem: OSV_ECOSYSTEM[ecosystem] };
   const body = JSON.stringify(version ? { package: pkg, version } : { package: pkg });
   const res = await request<OsvResponse>(
@@ -35,7 +35,7 @@ export async function queryOsv(
   return { ok: true, data: (res.data.vulns ?? []).map(normalizeVuln) };
 }
 
-export function normalizeVuln(v: OsvVuln): Advisory {
+export const normalizeVuln = (v: OsvVuln): Advisory => {
   return { id: v.id, severity: mapSeverity(v.database_specific?.severity), summary: v.summary };
 }
 

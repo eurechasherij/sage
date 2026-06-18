@@ -9,11 +9,11 @@ import { DEFAULT_ALIASES, type Alias } from "./aliases.js";
  * This is NOT the final answer — the host model ranks/decides. It exists so the
  * obvious reuse (installed swr / pennant) is never missed.
  */
-export function matchInstalled(
+export const matchInstalled = (
   capability: string,
   installed: InstalledPackage[],
   aliases: Alias[] = DEFAULT_ALIASES,
-): InstalledPackage[] {
+): InstalledPackage[] => {
   const cap = capability.toLowerCase();
   const aliased = new Set<string>();
   for (const a of aliases) {

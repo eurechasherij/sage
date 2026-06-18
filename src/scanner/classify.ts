@@ -13,7 +13,7 @@ const NPM_PUBLIC_REGISTRY = "https://registry.npmjs.org/";
  * npm: public iff resolved from registry.npmjs.org and not a local link.
  * `link: true` marks a workspace/local package — always private.
  */
-export function isNpmPublic(resolved: string | undefined, link: boolean | undefined): boolean {
+export const isNpmPublic = (resolved: string | undefined, link: boolean | undefined): boolean => {
   if (link) return false;
   if (!resolved) return false;
   return resolved.startsWith(NPM_PUBLIC_REGISTRY);
@@ -49,7 +49,7 @@ interface ComposerPkgSrc {
   dist?: { type?: string; url?: string };
 }
 
-export function hostOf(u: string | undefined): string | undefined {
+export const hostOf = (u: string | undefined): string | undefined => {
   if (!u) return undefined;
   try {
     return new URL(u).host;
@@ -59,7 +59,7 @@ export function hostOf(u: string | undefined): string | undefined {
   }
 }
 
-export function normalizeRepo(u: string | undefined): string | undefined {
+export const normalizeRepo = (u: string | undefined): string | undefined => {
   if (!u) return undefined;
   return u
     .toLowerCase()
@@ -71,7 +71,7 @@ export function normalizeRepo(u: string | undefined): string | undefined {
     .replace(/\/+$/, "");
 }
 
-export function isComposerPublic(pkg: ComposerPkgSrc, ctx: ComposerCtx): boolean {
+export const isComposerPublic = (pkg: ComposerPkgSrc, ctx: ComposerCtx): boolean => {
   if (pkg.dist?.type === "path" || pkg.source?.type === "path") return false;
   if (ctx.packagistDisabled) return false;
 
@@ -85,7 +85,7 @@ export function isComposerPublic(pkg: ComposerPkgSrc, ctx: ComposerCtx): boolean
 }
 
 /** Build classification context from composer.json `repositories`. */
-export function composerCtxFromRepositories(repositories: unknown): ComposerCtx {
+export const composerCtxFromRepositories = (repositories: unknown): ComposerCtx => {
   const privateRepoUrls = new Set<string>();
   const privateHosts = new Set<string>();
   let packagistDisabled = false;

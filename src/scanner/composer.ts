@@ -21,7 +21,7 @@ interface ComposerLock {
  * registry) and marks private only what composer.json declares private. See
  * classify.ts for the shared-host vs custom-host rules.
  */
-export async function scanComposer(root: string): Promise<InstalledPackage[]> {
+export const scanComposer = async (root: string): Promise<InstalledPackage[]> => {
   let raw: string;
   try {
     raw = await readFile(join(root, "composer.lock"), "utf8");

@@ -9,12 +9,10 @@ export interface TaskRef {
   text?: string;
 }
 
-export function sha256(s: string): string {
-  return createHash("sha256").update(s).digest("hex");
-}
+export const sha256 = (s: string): string => createHash("sha256").update(s).digest("hex");
 
 /** Stable, filesystem-safe key naming the decision artifact for a task. */
-export function taskKey(ref: TaskRef): string {
+export const taskKey = (ref: TaskRef): string => {
   if (ref.ticket) return slug(ref.ticket);
   if (ref.branch) return slug(ref.branch);
   if (ref.text) return `task-${sha256(ref.text).slice(0, 12)}`;
