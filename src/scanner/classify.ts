@@ -90,6 +90,15 @@ export const isComposerPublic = (pkg: ComposerPkgSrc, ctx: ComposerCtx): boolean
 // configured to a custom registry in bunfig.toml [install.scopes].
 const NON_REGISTRY_PROTOCOLS = new Set(["workspace", "file", "link", "git", "url"]);
 
+// Hosts that mean "the public npm/yarn registry". Used by yarn (resolved URL) and
+// pnpm (resolution tarball) to tell a registry package from a private/custom one.
+const PUBLIC_REGISTRY_HOSTS = new Set(["registry.npmjs.org", "registry.yarnpkg.com"]);
+
+export const isPublicRegistryUrl = (url: string | undefined): boolean => {
+  const h = hostOf(url);
+  return !!h && PUBLIC_REGISTRY_HOSTS.has(h);
+};
+
 export const isBunPublic = (
   name: string,
   protocol: string,

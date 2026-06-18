@@ -79,24 +79,3 @@ bun run typecheck   # tsc, checks all sources incl. tests
 bun test ./src      # bun:test; pure logic unit-tested with a fake fetch (no network)
 bun run build       # tsc -p tsconfig.build.json -> dist/ (excludes tests; bins: sage, sage-mcp)
 ```
-
-## Status
-
-Host-side-first slice of v1 is built and tested: dependency scanner (npm,
-bun, composer) with privacy classification, the data layer (search/health/docs with
-graceful degradation), the auto-install safety floor, the capability matcher, the
-decision artifact with integrity binding, the pure-data MCP server, the CLI, and
-the `/work` skill.
-
-Deployed: the hosted MCP + landing page run on Cloudflare Workers at
-`sage.rematcha.dev` (push-to-deploy via Workers Builds).
-
-Lockfiles scanned today: `package-lock.json`, `bun.lock`, `composer.lock` (SAGE
-scans its own bun repo). **pnpm-lock.yaml / yarn.lock** are not parsed yet (they
-need a YAML / custom parser).
-
-Not yet built (planned, see the design docs): pnpm/yarn lockfile scanning,
-Context7-backed exact versioned docs, and the enforcement increment (a PreToolUse
-hook or CI check that makes the gate non-skippable — v1 is a strong convention, not
-a hard wall). Run the 20-task replay benchmark before investing further in
-world-search depth.

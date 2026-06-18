@@ -1,6 +1,8 @@
 import { access } from "node:fs/promises";
 import { join } from "node:path";
 import { scanNpm } from "./npm.js";
+import { scanPnpm } from "./pnpm.js";
+import { scanYarn } from "./yarn.js";
 import { scanBun } from "./bun.js";
 import { scanComposer } from "./composer.js";
 import type { Ecosystem, InstalledPackage, ScanResult } from "./types.js";
@@ -22,11 +24,15 @@ export const scanProject = async (root: string): Promise<ScanResult> => {
   const ecosystems: Ecosystem[] = [];
   const packages: InstalledPackage[] = [];
 
-  // npm ecosystem: prefer package-lock.json, fall back to bun.lock (both resolve
-  // to npm packages). pnpm-lock.yaml / yarn.lock are not parsed yet.
+  // npm ecosystem: one JS package manager per repo. Pick by which lockfile exists,
+  // in priority order. (All resolve to npm packages.)
   let npmPackages: InstalledPackage[] = [];
   if (await exists(join(root, "package-lock.json"))) {
     npmPackages = await scanNpm(root);
+  } else if (await exists(join(root, "pnpm-lock.yaml"))) {
+    npmPackages = await scanPnpm(root);
+  } else if (await exists(join(root, "yarn.lock"))) {
+    npmPackages = await scanYarn(root);
   } else if (await exists(join(root, "bun.lock"))) {
     npmPackages = await scanBun(root);
   }

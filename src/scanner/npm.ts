@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { isNpmPublic } from "./classify.js";
+import { readPackageJsonDirect } from "./manifest.js";
 import type { InstalledPackage } from "./types.js";
 
 interface LockNode {
@@ -32,7 +33,7 @@ export const scanNpm = async (root: string): Promise<InstalledPackage[]> => {
   const lock = JSON.parse(lockRaw) as PackageLock;
   if (!lock.packages) return []; // lockfileVersion 1 not supported yet
 
-  const direct = await readDirectDeps(root);
+  const direct = await readPackageJsonDirect(root);
   const found: InstalledPackage[] = [];
 
   for (const [key, node] of Object.entries(lock.packages)) {
@@ -51,28 +52,6 @@ export const scanNpm = async (root: string): Promise<InstalledPackage[]> => {
   }
 
   return dedupeByName(found);
-}
-
-async function readDirectDeps(root: string): Promise<Set<string>> {
-  const names = new Set<string>();
-  try {
-    const pj = JSON.parse(await readFile(join(root, "package.json"), "utf8")) as Record<
-      string,
-      Record<string, string> | undefined
-    >;
-    for (const field of [
-      "dependencies",
-      "devDependencies",
-      "optionalDependencies",
-      "peerDependencies",
-    ]) {
-      const deps = pj[field];
-      if (deps) for (const n of Object.keys(deps)) names.add(n);
-    }
-  } catch {
-    // no/invalid package.json — direct set stays empty
-  }
-  return names;
 }
 
 /** A package name can appear at multiple paths/versions; keep one, prefer the direct entry. */
