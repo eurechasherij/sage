@@ -55,6 +55,28 @@ bun run ~/.claude/skills/sage/src/cli.ts match "<capability>" # installed packag
 the skill calls it so the agent never re-implements lockfile parsing or eyeballs
 "is this package private". The same logic backs the future CI/hook enforcement.
 
+## Deploy the MCP service (Cloudflare Workers, push-to-deploy)
+
+The MCP service runs as a stateless Cloudflare Worker (`src/worker.ts`, served at
+`/mcp` via `createMcpHandler`). `wrangler.jsonc` configures it (`nodejs_compat`, no
+Durable Objects).
+
+Push-to-deploy via **Workers Builds**: connect the GitHub repo in the Cloudflare
+dashboard, set **Build command** empty and **Deploy command** `npx wrangler deploy`.
+Cloudflare's build server runs that on every push to the production branch — you
+never run it locally. After the first deploy, the service is live at
+`https://sage.<account>.workers.dev/mcp`.
+
+Then point the install at the hosted URL instead of the local stdio server:
+
+```
+claude mcp add --scope user --transport http sage https://sage.<account>.workers.dev/mcp
+```
+
+Local checks before pushing: `bun run typecheck`, `bunx wrangler deploy --dry-run`
+(bundles without deploying), `bun run dev:worker` (runs it locally on
+`http://localhost:8787/mcp`).
+
 ## Develop
 
 This project uses [Bun](https://bun.sh).
