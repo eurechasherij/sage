@@ -1,0 +1,5 @@
+{"task": "add polling to the dashboard", "outcome": "ignored-installed-dep", "note": "agent hand-rolled useEffect polling; SWR was installed"}
+{"task": "beta-user feature flag", "outcome": "ignored-documented-api", "note": "agent wrote a Pennant workaround instead of Feature::resolveValue"}
+{"task": "format invoice dates", "outcome": "ignored-installed-dep", "note": "agent wrote a manual date formatter; dayjs installed"}
+{"task": "money rounding in checkout", "outcome": "needed-new-package", "note": "no decimal lib installed; needed decimal.js"}
+{"task": "render markdown in comments", "outcome": "fine", "note": "agent used the installed markdown lib correctly"}
