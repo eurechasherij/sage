@@ -10,8 +10,13 @@ agents. See `docs/design-001-research-first-work-gate.md` for the architecture.
 - Internal (non-exported) helpers may stay as `function` declarations when hoisting
   is relied on (e.g. a helper used above its definition).
 - TypeScript, ESM (`NodeNext`), strict mode with `noUncheckedIndexedAccess`.
-- Tests are vitest, colocated as `*.test.ts`. Pure logic is unit-tested with an
-  injected fake `fetch` — no live network in the test suite.
+- **Bun** is the toolchain: `bun install`, `bun test ./src`, `bun run build`. Bun
+  runs `.ts` directly (e.g. `bun run src/cli.ts`), no build needed for dev.
+- Tests are `bun:test`, colocated as `*.test.ts`, run with `bun test ./src` (scoped
+  to src so the compiled `dist/` copies are not double-run). Pure logic is
+  unit-tested with an injected fake `fetch` — no live network in the test suite.
+- `tsconfig.build.json` (build) excludes tests from `dist/`; `tsconfig.json`
+  (typecheck) includes them.
 
 ## Architecture invariant
 All model reasoning lives host-side; the hosted service (`sage.rematcha.dev`) is a

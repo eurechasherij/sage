@@ -14,14 +14,15 @@
     "./data": "./dist/data/index.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "bun test ./src",
+    "dev:mcp": "bun run src/mcp/stdio.ts"
   },
   "devDependencies": {
+    "@types/bun": "latest",
     "@types/node": "^22.7.0",
-    "typescript": "^5.6.3",
-    "vitest": "^2.1.4"
+    "typescript": "^5.6.3"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

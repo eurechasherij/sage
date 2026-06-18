@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { request, type FetchFn } from "./http.js";
 import { normalizeVuln, queryOsv } from "./osv.js";
 import { searchNpm, npmHealthBits } from "./npm-registry.js";
