@@ -3,31 +3,32 @@ set -euo pipefail
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # SAGE setup — run after cloning into ~/.claude/skills/sage.
-# No TypeScript build: Bun runs the scanner + MCP server straight from source.
+# The data service is hosted (sage.rematcha.dev); the only local part is the
+# scanner, which the /work skill runs via Bun straight from source. The scanner
+# has no external deps, so there is no install and no build.
+
+HOSTED_MCP="https://sage.rematcha.dev/mcp"
 
 if ! command -v bun >/dev/null 2>&1; then
-  echo "SAGE needs Bun. Install it: https://bun.sh  (curl -fsSL https://bun.sh/install | bash)"
+  echo "SAGE needs Bun (the /work skill runs the scanner with it):"
+  echo "  curl -fsSL https://bun.sh/install | bash"
   exit 1
 fi
 
-echo "Installing SAGE dependencies (no build, ~2s)..."
-( cd "$DIR" && bun install --silent )
-
-# Register the MCP. Local stdio for now (fully functional — it calls the public
-# npm/Packagist/OSV APIs from this machine). Swap to the hosted URL once
-# sage.rematcha.dev is deployed:
-#   claude mcp add --scope user --transport http sage https://sage.rematcha.dev/mcp
+# Register the hosted MCP (search / health / docs). No local server, no deps.
 if command -v claude >/dev/null 2>&1; then
-  if claude mcp add --scope user --transport stdio sage -- bun run "$DIR/src/mcp/stdio.ts" 2>/dev/null; then
-    echo "✓ Registered the 'sage' MCP (user scope)."
+  if claude mcp add --scope user --transport http sage "$HOSTED_MCP" 2>/dev/null; then
+    echo "✓ Registered the 'sage' MCP -> $HOSTED_MCP (user scope)."
   else
     echo "• 'sage' MCP already registered (or add it manually):"
-    echo "    claude mcp add --scope user --transport stdio sage -- bun run \"$DIR/src/mcp/stdio.ts\""
+    echo "    claude mcp add --scope user --transport http sage $HOSTED_MCP"
   fi
 else
   echo "• 'claude' CLI not found. Register the MCP manually:"
-  echo "    claude mcp add --scope user --transport stdio sage -- bun run \"$DIR/src/mcp/stdio.ts\""
+  echo "    claude mcp add --scope user --transport http sage $HOSTED_MCP"
 fi
 
 echo
 echo "✓ SAGE installed. The /work skill is ready (start a new session if it isn't listed yet)."
+echo "  Offline/dev alternative — run the MCP locally instead of the hosted one:"
+echo "    cd \"$DIR\" && bun install && claude mcp add --scope user --transport stdio sage -- bun run \"$DIR/src/mcp/stdio.ts\""

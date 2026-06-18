@@ -35,11 +35,12 @@ Requires [Bun](https://bun.sh). Open Claude Code and paste:
 
 > Install SAGE: run `git clone --single-branch --depth 1 <SAGE_REPO_URL> ~/.claude/skills/sage && cd ~/.claude/skills/sage && ./setup`, then add a "sage" section to CLAUDE.md saying to run the `/work` skill before implementing any ticket in an npm or composer project. Then ask me if I also want SAGE added to the current project for teammates.
 
-That clones SAGE into `~/.claude/skills/sage`, installs deps (no build — Bun runs
-the TypeScript directly), and registers the `sage` MCP. The `/work` skill is then
-available everywhere. There is nothing to build and no per-project pull.
+That clones SAGE into `~/.claude/skills/sage` and registers the hosted `sage` MCP
+(`https://sage.rematcha.dev/mcp`). The `/work` skill is then available everywhere.
+Nothing to build, no `bun install`, no local server — the data service is hosted and
+the scanner the skill runs has no dependencies. (Bun is required to run the scanner.)
 
-(`<SAGE_REPO_URL>` is this repo's git remote — push it to GitHub first.)
+(`<SAGE_REPO_URL>` = `https://github.com/eurechasherij/sage.git`.)
 
 ## The host-side engine (run by the skill, not by you)
 
@@ -61,17 +62,14 @@ The MCP service runs as a stateless Cloudflare Worker (`src/worker.ts`, served a
 `/mcp` via `createMcpHandler`). `wrangler.jsonc` configures it (`nodejs_compat`, no
 Durable Objects).
 
-Push-to-deploy via **Workers Builds**: connect the GitHub repo in the Cloudflare
-dashboard, set **Build command** empty and **Deploy command** `npx wrangler deploy`.
-Cloudflare's build server runs that on every push to the production branch — you
-never run it locally. After the first deploy, the service is live at
-`https://sage.<account>.workers.dev/mcp`.
+**Live:** the landing page is at `https://sage.rematcha.dev/` and the MCP at
+`https://sage.rematcha.dev/mcp` (the install one-liner registers it).
 
-Then point the install at the hosted URL instead of the local stdio server:
-
-```
-claude mcp add --scope user --transport http sage https://sage.<account>.workers.dev/mcp
-```
+Push-to-deploy via **Workers Builds**: the GitHub repo is connected with **Build
+command** empty and **Deploy command** `npx wrangler deploy`. Cloudflare's build
+server runs that on every push to the production branch — you never run it locally.
+`/` serves `public/index.html`; `/mcp` is the stateless MCP. The custom domain
+`sage.rematcha.dev` is attached to the Worker in the Cloudflare dashboard.
 
 Local checks before pushing: `bun run typecheck`, `bunx wrangler deploy --dry-run`
 (bundles without deploying), `bun run dev:worker` (runs it locally on
@@ -96,10 +94,12 @@ graceful degradation), the auto-install safety floor, the capability matcher, th
 decision artifact with integrity binding, the pure-data MCP server, the CLI, and
 the `/work` skill.
 
+Deployed: the hosted MCP + landing page run on Cloudflare Workers at
+`sage.rematcha.dev` (push-to-deploy via Workers Builds).
+
 Not yet built (planned, see the design docs): **bun/pnpm/yarn lockfile scanning**
 (only `package-lock.json` + `composer.lock` today — note SAGE's own repo now uses
-`bun.lock`, so it can't yet scan itself), the hosted deployment to sage.rematcha.dev,
-Context7-backed exact versioned docs, and the enforcement increment (a PreToolUse
-hook or CI check that makes the gate non-skippable — v1 is a strong convention, not
-a hard wall). Run the 20-task replay benchmark before investing further in
-world-search depth.
+`bun.lock`, so it can't yet scan itself), Context7-backed exact versioned docs, and
+the enforcement increment (a PreToolUse hook or CI check that makes the gate
+non-skippable — v1 is a strong convention, not a hard wall). Run the 20-task replay
+benchmark before investing further in world-search depth.
